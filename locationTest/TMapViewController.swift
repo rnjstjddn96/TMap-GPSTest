@@ -13,7 +13,14 @@ import CoreLocation
 import RxCocoa
 import RxSwift
 
-class MapViewController: UIViewController, NVActivityIndicatorViewable {
+class TMapViewController: UIViewController, NVActivityIndicatorViewable {
+    
+    let tableView: UITableView = {
+        let tb = UITableView()
+        tb.translatesAutoresizingMaskIntoConstraints = false
+        return tb
+    }()
+    var needTableView: Bool = false
     
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation? {
@@ -83,6 +90,7 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
         view.layer.shadowRadius = 5
         return view
     }()
+    var zoombuttonShows: Bool = true
     
     let btnZoomIn: UIButton = {
         let btn = UIButton()
@@ -105,9 +113,8 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
         return btn
     }()
     
-    
-    
     var mapView: TMapView?
+    var resultPoiArray: Array<TMapPoiItem> = []
     
     var apiKey: String {
         get {
@@ -121,6 +128,7 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
         view.backgroundColor = .white
         view.addSubview(mapContainerView)
         view.addSubview(toolbar)
+        
         toolbar.snp.makeConstraints { create in
             create.left.right.bottom.equalTo(view)
             create.height.equalTo(view).multipliedBy(0.1)
@@ -144,10 +152,12 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
 
     func initSearchBar(view: UIView) {
         view.addSubview(self.searchBar)
+        
+        self.searchBar.setShowsCancelButton(true, animated: true)
+        
         searchBar.snp.makeConstraints { create in
             create.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             create.left.right.equalToSuperview()
-            
         }
     }
     
@@ -211,7 +221,7 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
             self.pathData.requestFindTitlePOI("상계역") { (items, error) in
                 guard let _items = items else { return }
                 for item in _items {
-                    print("asdfasd: \(item.poiName)")
+                    print("poiNames: \(item.poiName)")
                 }
             }
         }).disposed(by: disposeBag)
@@ -223,7 +233,7 @@ class MapViewController: UIViewController, NVActivityIndicatorViewable {
     }
 }
 
-extension MapViewController: TMapViewDelegate {
+extension TMapViewController: TMapViewDelegate {
     
     func initMapView() {
         mapContainerView.subviews.forEach { $0.removeFromSuperview() }
@@ -239,6 +249,7 @@ extension MapViewController: TMapViewDelegate {
         self.initCurrentLocationButton(view: self.mapContainerView)
         self.initZoomButton(view: self.mapContainerView)
         self.initSearchBar(view: self.mapContainerView)
+        self.initTableView()
         mapContainerView.addSubview(loadingView)
         
 //        교통정보 색으로 구분지어 제공
@@ -293,6 +304,11 @@ extension MapViewController: TMapViewDelegate {
     func mapView(_ mapView: TMapView, singleTapOnMap location: CLLocationCoordinate2D) {
         // 지도 싱글 탭
         print("Single Tap on location: latitude: \(location.latitude), logitude: \(location.longitude) ")
+        zoombuttonShows.toggle()
+        UIView.animate(withDuration: 0.5) {
+            self.zoomButtonContainer.alpha = self.zoombuttonShows ? 1 : 0
+            self.btnToCurLoc.alpha = self.zoombuttonShows ? 1 : 0
+        }
         self.view.endEditing(true)
     }
     
@@ -308,7 +324,7 @@ extension MapViewController: TMapViewDelegate {
     
 }
 
-extension MapViewController: CLLocationManagerDelegate {
+extension TMapViewController: CLLocationManagerDelegate {
     
     func setGPS(onComplete: @escaping (() -> Void)) {
         locationManager = CLLocationManager()
@@ -332,12 +348,12 @@ extension MapViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let coor = manager.location?.coordinate {
+//        if let coor = manager.location?.coordinate {
 //            print("latitude" + String(coor.latitude) + " longitude" + String(coor.longitude))
-            let latitude = String(coor.latitude)
-            let longitude = String(coor.longitude)
-            shootAPI(latitude: latitude, longitude: longitude)
-        }
+//            let latitude = String(coor.latitude)
+//            let longitude = String(coor.longitude)
+//            shootAPI(latitude: latitude, longitude: longitude)
+//        }
         self.currentLocation = locations.last
     }
     
@@ -367,14 +383,12 @@ extension MapViewController: CLLocationManagerDelegate {
     
 }
 
-extension MapViewController: UISearchBarDelegate {
+extension TMapViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print("asdfawd")
         guard let text = searchBar.text else { return }
         self.searchText = text
         self.pathData.requestFindTitlePOI(text) { results, error in
-            print("text: \(text)")
             guard let _results = results else { return }
             DispatchQueue.main.async {
                 self.mapView?.setCenter(_results.first?.coordinate ?? CLLocationCoordinate2D())
@@ -383,12 +397,106 @@ extension MapViewController: UISearchBarDelegate {
                     let marker = TMapMarker(position: coord)
                     marker.map = self.mapView
                     self.POImarkers.append(marker)
+                    self.resultPoiArray.removeAll()
                 }
             }
-            
-            
         }
+        self.needTableView = false
+        self.view.endEditing(true)
+        toggleTableView()
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        self.needTableView = true
+        toggleTableView()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard let text = searchBar.text else { return }
+        if(text.isEmpty) {
+            self.resultPoiArray.removeAll()
+            self.needTableView = false
+        } else {
+            self.needTableView = true
+            self.pathData.requestFindTitlePOI(text) { results, error in
+                guard let _results = results else { return }
+                var tempArr: [TMapPoiItem] = []
+                    for result in _results {
+                        tempArr.append(result)
+                    }
+                self.resultPoiArray = tempArr
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+        toggleTableView()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.needTableView = false
+        toggleTableView()
         self.view.endEditing(true)
     }
+//    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
+//        self.needTableView = false
+//    }
 }
 
+extension TMapViewController: UITableViewDelegate, UITableViewDataSource {
+    func initTableView() {
+        self.mapContainerView.addSubview(tableView)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        
+        tableView.snp.makeConstraints { make in
+            make.left.right.equalToSuperview()
+            make.top.equalTo(self.toolbar.snp.bottom)
+            make.height.equalTo(0)
+        }
+    }
+    
+    func toggleTableView() {
+        UIView.animate(withDuration: 0.5) {
+            if(self.needTableView == true ) {
+                self.tableView.snp.remakeConstraints { remake in
+                    remake.left.right.equalToSuperview()
+                    remake.top.equalTo(self.searchBar.snp.bottom)
+                    remake.height.equalToSuperview()
+                }
+                self.tableView.reloadData()
+                self.mapContainerView.layoutIfNeeded()
+            } else {
+                self.tableView.snp.remakeConstraints { remake in
+                    remake.left.right.equalToSuperview()
+                    remake.top.equalTo(self.toolbar.snp.bottom)
+                    remake.height.equalTo(0)
+                }
+                self.mapContainerView.layoutIfNeeded()
+            }
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.resultPoiArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = resultPoiArray[indexPath.row].poiName
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let position = self.resultPoiArray[indexPath.row].coordinate
+        if let latitude = position?.latitude, let longitude = position?.longitude {
+            let coord = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            let marker = TMapMarker(position: coord)
+            self.mapView?.setCenter(coord)
+            marker.map = self.mapView
+        }
+        self.needTableView = false
+        toggleTableView()
+    }
+}

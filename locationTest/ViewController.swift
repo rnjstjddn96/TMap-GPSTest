@@ -16,10 +16,9 @@ class ViewController: UIViewController {
     
     var disposeBag = DisposeBag()
     
-    
-    let button: UIButton = {
+    let btnNMap: UIButton = {
         let btn = UIButton()
-        btn.setTitle("IndicatorShows", for: .normal)
+        btn.setTitle("to NaverMap", for: .normal)
         btn.backgroundColor = .black
         btn.setTitleColor(.white, for: .normal)
         btn.setTitleColor(.black, for: .highlighted)
@@ -29,9 +28,9 @@ class ViewController: UIViewController {
         return btn
     }()
     
-    let btnMap: UIButton = {
+    let btnTMap: UIButton = {
         let btn = UIButton()
-        btn.setTitle("to Map", for: .normal)
+        btn.setTitle("to TMap", for: .normal)
         btn.backgroundColor = .black
         btn.setTitleColor(.white, for: .normal)
         btn.setTitleColor(.black, for: .highlighted)
@@ -45,32 +44,30 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         view.backgroundColor = .white
-        view.addSubview(button)
-        view.addSubview(btnMap)
+        view.addSubview(btnNMap)
+        view.addSubview(btnTMap)
         
-        btnMap.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -view.frame.height/4).isActive = true
-        btnMap.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        btnMap.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        btnMap.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        btnTMap.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -view.frame.height/4).isActive = true
+        btnTMap.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        btnTMap.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        btnTMap.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
-        button.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: view.frame.height/4).isActive = true
-        button.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        button.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        btnNMap.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: view.frame.height/4).isActive = true
+        btnNMap.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        btnNMap.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        btnNMap.widthAnchor.constraint(equalToConstant: 150).isActive = true
         
         
         
-        button.rx.tap.subscribe(onNext: { [weak self] _ in
+        btnNMap.rx.tap.subscribe(onNext: { [weak self] _ in
             guard let self = self else { return }
-//            self.indicatorView.startAnimating()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-//                self.indicatorView.stopAnimating()
-            })
+            let mapViewController = NaverMapViewController()
+            self.navigationController?.pushViewController(mapViewController, animated: true)
         }).disposed(by: disposeBag)
         
-        btnMap.rx.tap.subscribe(onNext: { [weak self] _ in
+        btnTMap.rx.tap.subscribe(onNext: { [weak self] _ in
             guard let self = self else { return }
-            let mapViewController = MapViewController()
+            let mapViewController = TMapViewController()
             self.navigationController?.pushViewController(mapViewController, animated: true)
         }).disposed(by: disposeBag)
     }
