@@ -10,11 +10,9 @@
 		7D0D090F25661AE7005E5EF5 /* TMapSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D0D090E25661AE7005E5EF5 /* TMapSDK.framework */; };
 		7D0D091025661AE7005E5EF5 /* TMapSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7D0D090E25661AE7005E5EF5 /* TMapSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7D3DD8492563BCED004E1690 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3DD8482563BCED004E1690 /* AppDelegate.swift */; };
-		7D3DD84D2563BCED004E1690 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3DD84C2563BCED004E1690 /* ViewController.swift */; };
 		7D3DD8522563BCEF004E1690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D3DD8512563BCEF004E1690 /* Assets.xcassets */; };
 		7D3DD8552563BCEF004E1690 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7D3DD8532563BCEF004E1690 /* LaunchScreen.storyboard */; };
 		7DAA424A2565FD2E006D1677 /* TMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAA42492565FD2E006D1677 /* TMapViewController.swift */; };
-		7DF13C5B256B330300C0903C /* NaverMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF13C5A256B330300C0903C /* NaverMapViewController.swift */; };
 		E2024A913B1788A56A24CCBF /* Pods_locationTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DB4606ECFCC6924EBE7FD9 /* Pods_locationTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -37,12 +35,10 @@
 		7D0D090E25661AE7005E5EF5 /* TMapSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TMapSDK.framework; sourceTree = "<group>"; };
 		7D3DD8452563BCED004E1690 /* locationTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = locationTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D3DD8482563BCED004E1690 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7D3DD84C2563BCED004E1690 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7D3DD8512563BCEF004E1690 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7D3DD8542563BCEF004E1690 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7D3DD8562563BCEF004E1690 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DAA42492565FD2E006D1677 /* TMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMapViewController.swift; sourceTree = "<group>"; };
-		7DF13C5A256B330300C0903C /* NaverMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapViewController.swift; sourceTree = "<group>"; };
 		966308FF78F61A7CB967B81A /* Pods-locationTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-locationTest.debug.xcconfig"; path = "Target Support Files/Pods-locationTest/Pods-locationTest.debug.xcconfig"; sourceTree = "<group>"; };
 		C9BF9221CE0C6BAE7A02B2BB /* Pods-locationTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-locationTest.release.xcconfig"; path = "Target Support Files/Pods-locationTest/Pods-locationTest.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,9 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				7D3DD8482563BCED004E1690 /* AppDelegate.swift */,
-				7D3DD84C2563BCED004E1690 /* ViewController.swift */,
 				7DAA42492565FD2E006D1677 /* TMapViewController.swift */,
-				7DF13C5A256B330300C0903C /* NaverMapViewController.swift */,
 				7D3DD8512563BCEF004E1690 /* Assets.xcassets */,
 				7D3DD8532563BCEF004E1690 /* LaunchScreen.storyboard */,
 				7D3DD8562563BCEF004E1690 /* Info.plist */,
@@ -224,8 +218,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7DF13C5B256B330300C0903C /* NaverMapViewController.swift in Sources */,
-				7D3DD84D2563BCED004E1690 /* ViewController.swift in Sources */,
 				7DAA424A2565FD2E006D1677 /* TMapViewController.swift in Sources */,
 				7D3DD8492563BCED004E1690 /* AppDelegate.swift in Sources */,
 			);

@@ -65,7 +65,7 @@ class TMapViewController: UIViewController, NVActivityIndicatorViewable {
         let searchBar = UISearchBar()
         return searchBar
     }()
-    
+    var searchBarNeeded: Bool = false
     let btnToCurLoc: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
@@ -128,11 +128,7 @@ class TMapViewController: UIViewController, NVActivityIndicatorViewable {
         view.backgroundColor = .white
         view.addSubview(mapContainerView)
         view.addSubview(toolbar)
-        
-        toolbar.snp.makeConstraints { create in
-            create.left.right.bottom.equalTo(view)
-            create.height.equalTo(view).multipliedBy(0.1)
-        }
+    
         mapContainerView.snp.makeConstraints { create in
             create.left.right.equalToSuperview()
             create.bottom.equalTo(toolbar.snp.top)
@@ -156,8 +152,9 @@ class TMapViewController: UIViewController, NVActivityIndicatorViewable {
         self.searchBar.setShowsCancelButton(true, animated: true)
         
         searchBar.snp.makeConstraints { create in
-            create.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            create.top.equalTo(view)
             create.left.right.equalToSuperview()
+            create.height.equalTo(0)
         }
     }
     
@@ -211,19 +208,21 @@ class TMapViewController: UIViewController, NVActivityIndicatorViewable {
     }
     
     func initToolbar() {
+        
+        toolbar.snp.makeConstraints { create in
+            create.left.right.equalTo(view)
+            create.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            create.height.equalTo(view).multipliedBy(0.07)
+        }
+        
         let toolbarItem1 = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: nil)
         let toolbarItem2 = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: nil)
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
         
         //현재 위치로 이동
         toolbarItem1.rx.tap.subscribe(onNext: { _ in
-            //액션 추가
-            self.pathData.requestFindTitlePOI("상계역") { (items, error) in
-                guard let _items = items else { return }
-                for item in _items {
-                    print("poiNames: \(item.poiName)")
-                }
-            }
+            self.searchBarNeeded.toggle()
+            self.toggleSearchBar()
         }).disposed(by: disposeBag)
         toolbarItem2.rx.tap.subscribe(onNext: { _ in
             //액션 추가
@@ -385,6 +384,28 @@ extension TMapViewController: CLLocationManagerDelegate {
 
 extension TMapViewController: UISearchBarDelegate {
     
+    func toggleSearchBar() {
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.5) {
+                if(self.searchBarNeeded) {
+                    self.searchBar.snp.remakeConstraints { remake in
+                        remake.left.right.equalToSuperview()
+                        remake.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+                        remake.height.greaterThanOrEqualTo(self.searchBar.snp.height)
+                    }
+                } else {
+                    self.searchBar.backgroundColor = .white
+                    self.searchBar.snp.remakeConstraints { remake in
+                        remake.left.right.equalToSuperview()
+                        remake.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+                        remake.height.equalTo(0)
+                    }
+                }
+                self.searchBar.superview?.layoutIfNeeded()
+            }
+        }
+    }
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text else { return }
         self.searchText = text
@@ -396,9 +417,10 @@ extension TMapViewController: UISearchBarDelegate {
                     guard let coord = result.coordinate else { return }
                     let marker = TMapMarker(position: coord)
                     marker.map = self.mapView
+                    self.mapView?.setZoom(16)
                     self.POImarkers.append(marker)
-                    self.resultPoiArray.removeAll()
                 }
+                self.resultPoiArray.removeAll()
             }
         }
         self.needTableView = false
@@ -414,7 +436,6 @@ extension TMapViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard let text = searchBar.text else { return }
         if(text.isEmpty) {
-            self.resultPoiArray.removeAll()
             self.needTableView = false
         } else {
             self.needTableView = true
@@ -463,9 +484,8 @@ extension TMapViewController: UITableViewDelegate, UITableViewDataSource {
                 self.tableView.snp.remakeConstraints { remake in
                     remake.left.right.equalToSuperview()
                     remake.top.equalTo(self.searchBar.snp.bottom)
-                    remake.height.equalToSuperview()
+                    remake.bottom.equalTo(self.toolbar.snp.top)
                 }
-                self.tableView.reloadData()
                 self.mapContainerView.layoutIfNeeded()
             } else {
                 self.tableView.snp.remakeConstraints { remake in
@@ -495,8 +515,12 @@ extension TMapViewController: UITableViewDelegate, UITableViewDataSource {
             let marker = TMapMarker(position: coord)
             self.mapView?.setCenter(coord)
             marker.map = self.mapView
+            self.mapView?.setZoom(16)
         }
+        tableView.reloadData()
         self.needTableView = false
         toggleTableView()
     }
+    
+    
 }
